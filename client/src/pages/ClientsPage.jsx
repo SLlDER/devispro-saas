@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { createClient } from '../api.js';
+import { createClient, deleteClient, updateClient } from '../api.js';
 
-export default function ClientsPage({ clients, onCreated }) {
+export default function ClientsPage({ clients, onCreated, onChanged, onDeleted }) {
   const [form, setForm] = useState({
     name: '',
     email: '',
     phone: '',
     address: ''
   });
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -21,13 +22,44 @@ export default function ClientsPage({ clients, onCreated }) {
     setMessage('');
 
     try {
-      const client = await createClient(form);
-      onCreated(client);
+      const client = editingId ? await updateClient(editingId, form) : await createClient(form);
+      if (editingId) {
+        onChanged(client);
+      } else {
+        onCreated(client);
+      }
+      setEditingId(null);
       setForm({ name: '', email: '', phone: '', address: '' });
     } catch (error) {
       setMessage(error.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function startEdit(client) {
+    setEditingId(client.id);
+    setForm({
+      name: client.name || '',
+      email: client.email || '',
+      phone: client.phone || '',
+      address: client.address || ''
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm({ name: '', email: '', phone: '', address: '' });
+  }
+
+  async function handleDelete(id) {
+    setMessage('');
+
+    try {
+      await deleteClient(id);
+      onDeleted(id);
+    } catch (error) {
+      setMessage(error.message);
     }
   }
 
@@ -42,7 +74,7 @@ export default function ClientsPage({ clients, onCreated }) {
 
       <div className="split-layout">
         <form onSubmit={handleSubmit} className="invoice-form">
-          <h3>Ajouter un client</h3>
+          <h3>{editingId ? 'Modifier le client' : 'Ajouter un client'}</h3>
 
           <label>
             Nom
@@ -64,9 +96,16 @@ export default function ClientsPage({ clients, onCreated }) {
             <textarea value={form.address} onChange={(event) => updateField('address', event.target.value)} />
           </label>
 
-          <button type="submit" className="primary" disabled={loading}>
-            {loading ? 'Enregistrement...' : 'Ajouter le client'}
-          </button>
+          <div className="form-actions">
+            {editingId && (
+              <button type="button" className="ghost" onClick={cancelEdit}>
+                Annuler
+              </button>
+            )}
+            <button type="submit" className="primary" disabled={loading}>
+              {loading ? 'Enregistrement...' : editingId ? 'Mettre a jour' : 'Ajouter le client'}
+            </button>
+          </div>
 
           {message && <p className="alert">{message}</p>}
         </form>
@@ -81,6 +120,14 @@ export default function ClientsPage({ clients, onCreated }) {
                 {client.email && <p>{client.email}</p>}
                 {client.phone && <p>{client.phone}</p>}
                 {client.address && <span>{client.address}</span>}
+                <div className="card-actions">
+                  <button className="ghost compact" onClick={() => startEdit(client)}>
+                    Modifier
+                  </button>
+                  <button className="danger compact" onClick={() => handleDelete(client.id)}>
+                    Supprimer
+                  </button>
+                </div>
               </article>
             ))
           )}

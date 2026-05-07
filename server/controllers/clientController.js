@@ -47,3 +47,49 @@ export async function getClients(req, res) {
 
   res.json(data);
 }
+
+export async function updateClient(req, res) {
+  const supabase = requireSupabase();
+  const { id } = req.params;
+  const { name, email, phone, address } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: 'Client name is required' });
+  }
+
+  const { data, error } = await supabase
+    .from('clients')
+    .update({
+      name: name.trim(),
+      email: email?.trim() || null,
+      phone: phone?.trim() || null,
+      address: address?.trim() || null
+    })
+    .eq('id', id)
+    .eq('user_id', req.user.id)
+    .select()
+    .single();
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
+}
+
+export async function deleteClient(req, res) {
+  const supabase = requireSupabase();
+  const { id } = req.params;
+
+  const { error } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', req.user.id);
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.status(204).send();
+}

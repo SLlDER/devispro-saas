@@ -17,6 +17,21 @@ add column if not exists vat_rate numeric(5, 2) not null default 20 check (vat_r
 alter table public.invoices
 add column if not exists status text not null default 'draft';
 
+alter table public.invoices
+add column if not exists document_type text not null default 'quote';
+
+alter table public.invoices
+add column if not exists document_number text;
+
+alter table public.invoices
+add column if not exists line_items jsonb not null default '[]'::jsonb;
+
+alter table public.invoices
+add column if not exists accepted_at timestamptz;
+
+alter table public.invoices
+add column if not exists signed_by text;
+
 do $$
 begin
   if not exists (
@@ -68,3 +83,12 @@ end $$;
 
 create index if not exists clients_user_id_name_idx
 on public.clients (user_id, name);
+
+create index if not exists invoices_user_id_document_number_idx
+on public.invoices (user_id, document_number);
+
+create table if not exists public.invoice_usage (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_count integer not null default 0,
+  updated_at timestamptz not null default now()
+);

@@ -54,6 +54,10 @@ async function request(path, options = {}) {
     throw new Error('Impossible de joindre le serveur. Verifiez que npm run dev est lance.');
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await response.json() : {};
 
@@ -68,6 +72,10 @@ export function fetchInvoices(userId) {
   return request(`/invoices/${userId}`);
 }
 
+export function fetchInvoiceUsage(userId) {
+  return request(`/invoice-usage/${userId}`);
+}
+
 export function fetchClients(userId) {
   return request(`/clients/${userId}`);
 }
@@ -79,6 +87,19 @@ export function createClient(client) {
   });
 }
 
+export function updateClient(id, client) {
+  return request(`/client/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(client)
+  });
+}
+
+export function deleteClient(id) {
+  return request(`/client/${id}`, {
+    method: 'DELETE'
+  });
+}
+
 export function createInvoice(invoice) {
   return request('/invoice', {
     method: 'POST',
@@ -86,8 +107,27 @@ export function createInvoice(invoice) {
   });
 }
 
+export function updateInvoice(id, invoice) {
+  return request(`/invoice/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(invoice)
+  });
+}
+
+export function deleteInvoice(id) {
+  return request(`/invoice/${id}`, {
+    method: 'DELETE'
+  });
+}
+
 export function createCheckoutSession() {
   return request('/create-checkout-session', {
+    method: 'POST'
+  });
+}
+
+export function createPortalSession() {
+  return request('/create-portal-session', {
     method: 'POST'
   });
 }

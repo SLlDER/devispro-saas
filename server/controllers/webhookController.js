@@ -1,12 +1,17 @@
 import { requireSupabase } from '../supabaseClient.js';
 import { requireStripe } from '../stripe.js';
 
-async function updateSubscriptionStatus(userId, status) {
+async function updateSubscriptionStatus(userId, status, stripeCustomerId = null) {
   if (!userId) return;
   const supabase = requireSupabase();
 
+  const { data } = await supabase.auth.admin.getUserById(userId);
+  const appMetadata = data.user?.app_metadata || {};
+
   await supabase.auth.admin.updateUserById(userId, {
     app_metadata: {
+      ...appMetadata,
+      ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
       subscription_status: status
     }
   });
@@ -31,7 +36,11 @@ export async function handleStripeWebhook(req, res) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    await updateSubscriptionStatus(session.metadata?.user_id || session.client_reference_id, 'active');
+    await updateSubscriptionStatus(
+      session.metadata?.user_id || session.client_reference_id,
+      'active',
+      session.customer
+    );
   }
 
   if (event.type === 'customer.subscription.deleted') {

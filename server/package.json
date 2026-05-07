@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "build": "npm install --include=dev --prefix ../client && npm run build --prefix ../client",
     "dev": "node --watch index.js",
     "start": "node index.js"
   },
