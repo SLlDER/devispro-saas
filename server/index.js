@@ -17,6 +17,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/', (req, res) => {
+  res.json({ name: 'DevisPro API', status: 'running' });
+});
+
 app.use('/', invoiceRoutes);
 app.use('/', clientRoutes);
 app.use('/', paymentRoutes);
