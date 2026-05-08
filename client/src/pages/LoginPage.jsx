@@ -1,4 +1,3 @@
-import { supabase } from "../lib/supabaseClient";
 import { useState } from 'react';
 import { supabase } from '../api.js';
 

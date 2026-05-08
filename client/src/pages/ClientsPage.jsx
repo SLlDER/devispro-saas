@@ -1,4 +1,3 @@
-import { supabase } from "../lib/supabaseClient";
 import { useState } from 'react';
 import { createClient, deleteClient, updateClient } from '../api.js';
 
