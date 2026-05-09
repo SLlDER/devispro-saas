@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
@@ -13,9 +14,11 @@ const port = process.env.PORT || 3001;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const clientDistPath = path.resolve(__dirname, '../client/dist');
+const clientIndexPath = path.join(clientDistPath, 'index.html');
+const hasClientBuild = fs.existsSync(clientIndexPath);
 const isProduction = process.env.NODE_ENV === 'production';
 
-if (!isProduction) {
+if (!isProduction || !hasClientBuild) {
   app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 }
 
@@ -30,15 +33,15 @@ app.use('/api', invoiceRoutes);
 app.use('/api', clientRoutes);
 app.use('/api', paymentRoutes);
 
-app.use('/', invoiceRoutes);
-app.use('/', clientRoutes);
-app.use('/', paymentRoutes);
-
-if (isProduction) {
+if (hasClientBuild) {
   app.use(express.static(clientDistPath));
 
   app.get('*', (req, res) => {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
+    res.sendFile(clientIndexPath);
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.status(503).send('DevisPro frontend build is missing. Run npm run build before starting the server.');
   });
 }
 
