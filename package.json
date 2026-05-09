@@ -2,6 +2,9 @@
   "name": "devispro-saas",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "install": "npm install --prefix server && npm install --include=dev --prefix client",
     "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
