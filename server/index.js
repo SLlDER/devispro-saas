@@ -6,6 +6,8 @@ import express from 'express';
 import cors from 'cors';
 import invoiceRoutes from './routes/invoices.js';
 import clientRoutes from './routes/clients.js';
+import profileRoutes from './routes/profile.js';
+import accountRoutes from './routes/account.js';
 import paymentRoutes from './routes/payments.js';
 import webhookRoutes from './routes/webhooks.js';
 
@@ -31,6 +33,8 @@ app.get('/health', (req, res) => {
 
 app.use('/api', invoiceRoutes);
 app.use('/api', clientRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', accountRoutes);
 app.use('/api', paymentRoutes);
 
 if (hasClientBuild) {

@@ -62,13 +62,14 @@ function getTotals(invoice) {
   };
 }
 
-function buildInvoicePdf(invoice) {
+function buildInvoicePdf(invoice, businessProfile) {
   const pdf = new jsPDF();
   const client = invoice.clients;
   const lineItems = getLineItems(invoice);
   const totals = getTotals(invoice);
   const documentNumber = invoice.document_number || `${invoice.id.slice(0, 8).toUpperCase()}`;
   const documentTitle = invoice.document_type === 'invoice' ? 'FACTURE' : 'DEVIS';
+  const issuer = businessProfile || {};
 
   pdf.setFillColor(15, 118, 110);
   pdf.rect(0, 0, 210, 34, 'F');
@@ -84,12 +85,19 @@ function buildInvoicePdf(invoice) {
   pdf.setTextColor(24, 33, 47);
   pdf.setFontSize(18);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('DevisPro', 20, 50);
+  pdf.text(issuer.business_name || 'Entreprise', 20, 50);
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(100, 116, 139);
-  pdf.text('Gestion de devis pour artisans', 20, 58);
-  pdf.text('Email: contact@devispro.fr', 20, 66);
+  const issuerLines = [
+    issuer.legal_form ? `${issuer.legal_form}${issuer.owner_name ? ` - ${issuer.owner_name}` : ''}` : issuer.owner_name,
+    issuer.address,
+    issuer.siret ? `SIRET: ${issuer.siret}` : null,
+    issuer.vat_number ? `TVA: ${issuer.vat_number}` : null,
+    issuer.email ? `Email: ${issuer.email}` : null,
+    issuer.phone ? `Tel: ${issuer.phone}` : null
+  ].filter(Boolean);
+  pdf.text(pdf.splitTextToSize(issuerLines.join('\n'), 85), 20, 58);
 
   pdf.setTextColor(24, 33, 47);
   pdf.setFont('helvetica', 'bold');
@@ -144,11 +152,17 @@ function buildInvoicePdf(invoice) {
   pdf.setTextColor(100, 116, 139);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
-  pdf.text('Devis valable 30 jours. Bon pour accord avec signature et date.', 20, 260);
+  const legalLines = [
+    invoice.document_type === 'quote' ? 'Devis valable 30 jours. Bon pour accord avec signature et date.' : null,
+    issuer.vat_exemption ? 'TVA non applicable, art. 293 B du CGI.' : null,
+    issuer.default_payment_terms,
+    issuer.default_late_fee,
+    invoice.document_type === 'invoice' ? 'Indemnite forfaitaire pour frais de recouvrement: 40 EUR en cas de retard de paiement.' : null,
+    issuer.insurance ? `Assurance professionnelle: ${issuer.insurance}` : null
+  ].filter(Boolean);
+  pdf.text(pdf.splitTextToSize(legalLines.join('\n'), 170), 20, 256);
   if (invoice.signed_by) {
-    pdf.text(`Accepte par ${invoice.signed_by} le ${formatDate(invoice.accepted_at)}`, 20, 268);
-  } else {
-    pdf.text('Merci pour votre confiance.', 20, 268);
+    pdf.text(`Accepte par ${invoice.signed_by} le ${formatDate(invoice.accepted_at)}`, 20, 284);
   }
 
   const fileName = `${documentNumber.toLowerCase()}-${invoice.client.toLowerCase().replaceAll(' ', '-')}.pdf`;
@@ -156,8 +170,8 @@ function buildInvoicePdf(invoice) {
   return { pdf, fileName, documentNumber };
 }
 
-function downloadInvoice(invoice) {
-  const { pdf, fileName } = buildInvoicePdf(invoice);
+function downloadInvoice(invoice, businessProfile) {
+  const { pdf, fileName } = buildInvoicePdf(invoice, businessProfile);
   pdf.save(fileName);
 }
 
@@ -186,19 +200,19 @@ function exportCsv(invoices) {
   URL.revokeObjectURL(url);
 }
 
-function emailInvoice(invoice) {
-  const { pdf, fileName } = buildInvoicePdf(invoice);
+function emailInvoice(invoice, businessProfile) {
+  const { pdf, fileName } = buildInvoicePdf(invoice, businessProfile);
   pdf.save(fileName);
 
   const subject = encodeURIComponent(`${typeLabels[invoice.document_type] || 'Devis'} ${invoice.document_number || ''}`);
   const body = encodeURIComponent(
-    `Bonjour,\n\nVeuillez trouver votre ${typeLabels[invoice.document_type]?.toLowerCase() || 'devis'} ${invoice.document_number || ''} d'un montant HT de ${formatPrice(invoice.price)}.\n\nLe PDF vient d'etre telecharge sur mon ordinateur. Je l'ajoute en piece jointe a cet email.\n\nCordialement,\nDevisPro`
+    `Bonjour,\n\nVeuillez trouver votre ${typeLabels[invoice.document_type]?.toLowerCase() || 'devis'} ${invoice.document_number || ''} d'un montant HT de ${formatPrice(invoice.price)}.\n\nLe PDF vient d'etre telecharge sur mon ordinateur. Je l'ajoute en piece jointe a cet email.\n\nCordialement,\n${businessProfile?.business_name || 'DevisPro'}`
   );
   const email = invoice.clients?.email || '';
   window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
-export default function InvoiceList({ invoices, onChanged, onDeleted }) {
+export default function InvoiceList({ invoices, businessProfile, onChanged, onDeleted }) {
   async function changeStatus(invoice, status) {
     const updated = await updateInvoice(invoice.id, { status });
     onChanged(updated);
@@ -250,10 +264,10 @@ export default function InvoiceList({ invoices, onChanged, onDeleted }) {
             <div className="invoice-card-side">
               <strong>{formatPrice(invoice.price)} HT</strong>
               <div className="card-actions">
-                <button onClick={() => downloadInvoice(invoice)} className="secondary compact">
+                <button onClick={() => downloadInvoice(invoice, businessProfile)} className="secondary compact">
                   PDF
                 </button>
-                <button onClick={() => emailInvoice(invoice)} className="ghost compact">
+                <button onClick={() => emailInvoice(invoice, businessProfile)} className="ghost compact">
                   PDF + Email
                 </button>
                 <button onClick={() => changeStatus(invoice, 'sent')} className="ghost compact">

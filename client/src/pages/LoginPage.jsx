@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../api.js';
+import LegalPage from './LegalPage.jsx';
 
 export default function LoginPage() {
   const [mode, setMode] = useState('login');
@@ -7,6 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [legalPage, setLegalPage] = useState(null);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -27,6 +29,10 @@ export default function LoginPage() {
     }
 
     setLoading(false);
+  }
+
+  if (legalPage) {
+    return <LegalPage page={legalPage} onBack={() => setLegalPage(null)} />;
   }
 
   return (
@@ -67,6 +73,18 @@ export default function LoginPage() {
         </form>
 
         {message && <p className="message">{message}</p>}
+
+        <footer className="auth-links">
+          <button className="link-button" onClick={() => setLegalPage('legal')}>
+            Mentions legales
+          </button>
+          <button className="link-button" onClick={() => setLegalPage('privacy')}>
+            Confidentialite
+          </button>
+          <button className="link-button" onClick={() => setLegalPage('terms')}>
+            Conditions
+          </button>
+        </footer>
       </section>
     </main>
   );

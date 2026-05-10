@@ -5,9 +5,11 @@ import {
   fetchClients,
   fetchInvoices,
   fetchInvoiceUsage,
+  fetchBusinessProfile,
   supabase
 } from '../api.js';
 import ClientsPage from './ClientsPage.jsx';
+import CompliancePage from './CompliancePage.jsx';
 import CreateInvoicePage from './CreateInvoicePage.jsx';
 import InvoiceList from '../components/InvoiceList.jsx';
 
@@ -20,6 +22,7 @@ export default function DashboardPage({ session }) {
   const [invoices, setInvoices] = useState([]);
   const [clients, setClients] = useState([]);
   const [usage, setUsage] = useState({ created_count: 0, free_limit: 3 });
+  const [businessProfile, setBusinessProfile] = useState(null);
   const [filters, setFilters] = useState({ status: 'all', type: 'all', search: '' });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -30,14 +33,16 @@ export default function DashboardPage({ session }) {
     setMessage('');
 
     try {
-      const [invoiceData, clientData, usageData] = await Promise.all([
+      const [invoiceData, clientData, usageData, profileData] = await Promise.all([
         fetchInvoices(session.user.id),
         fetchClients(session.user.id),
-        fetchInvoiceUsage(session.user.id)
+        fetchInvoiceUsage(session.user.id),
+        fetchBusinessProfile()
       ]);
       setInvoices(invoiceData);
       setClients(clientData);
       setUsage(usageData);
+      setBusinessProfile(profileData);
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -156,7 +161,16 @@ export default function DashboardPage({ session }) {
         <button className={view === 'clients' ? 'active' : ''} onClick={() => setView('clients')}>
           Clients
         </button>
+        <button className={view === 'compliance' ? 'active' : ''} onClick={() => setView('compliance')}>
+          Entreprise
+        </button>
       </nav>
+
+      {!businessProfile && view !== 'compliance' && (
+        <p className="alert">
+          Completez vos informations entreprise avant d'envoyer des devis professionnels.
+        </p>
+      )}
 
       {message && <p className="alert">{message}</p>}
 
@@ -167,7 +181,7 @@ export default function DashboardPage({ session }) {
               <h2>Mes devis</h2>
               <p>Retrouvez et exportez vos devis clients.</p>
             </div>
-            <button onClick={() => setView('create')} className="primary">
+            <button onClick={() => (businessProfile ? setView('create') : setView('compliance'))} className="primary">
               Creer un devis
             </button>
           </div>
@@ -218,6 +232,7 @@ export default function DashboardPage({ session }) {
           ) : (
             <InvoiceList
               invoices={filteredInvoices}
+              businessProfile={businessProfile}
               onChanged={handleInvoiceChanged}
               onDeleted={handleInvoiceDeleted}
             />
@@ -230,8 +245,15 @@ export default function DashboardPage({ session }) {
           onChanged={handleClientChanged}
           onDeleted={handleClientDeleted}
         />
+      ) : view === 'compliance' ? (
+        <CompliancePage profile={businessProfile} onSaved={setBusinessProfile} />
       ) : (
-        <CreateInvoicePage clients={clients} onCreated={handleCreated} onCancel={() => setView('dashboard')} />
+        <CreateInvoicePage
+          clients={clients}
+          businessProfile={businessProfile}
+          onCreated={handleCreated}
+          onCancel={() => setView('dashboard')}
+        />
       )}
     </main>
   );

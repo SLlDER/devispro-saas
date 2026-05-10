@@ -61,7 +61,8 @@ p {
 }
 
 .centered,
-.auth-page {
+.auth-page,
+.legal-page {
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -80,6 +81,10 @@ p {
 
 .auth-panel {
   max-width: 430px;
+}
+
+.legal-content {
+  max-width: 760px;
 }
 
 .auth-panel h1,
@@ -342,6 +347,42 @@ p {
   font-weight: 800;
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.checkbox-row {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  font-weight: 600;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+.legal-actions,
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.link-button {
+  background: transparent;
+  color: #2563eb;
+  padding: 0;
+}
+
+.small-note {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
 .invoice-card-side {
   display: grid;
   justify-items: end;
@@ -381,6 +422,7 @@ p {
 
   .stats-grid,
   .filters,
+  .form-grid,
   .line-item {
     grid-template-columns: 1fr;
   }

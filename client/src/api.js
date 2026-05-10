@@ -131,3 +131,24 @@ export function createPortalSession() {
     method: 'POST'
   });
 }
+
+export function fetchBusinessProfile() {
+  return request('/business-profile');
+}
+
+export function saveBusinessProfile(profile) {
+  return request('/business-profile', {
+    method: 'PUT',
+    body: JSON.stringify(profile)
+  });
+}
+
+export function exportAccount() {
+  return request('/account/export');
+}
+
+export function deleteAccount() {
+  return request('/account', {
+    method: 'DELETE'
+  });
+}

@@ -11,7 +11,7 @@ function emptyLine() {
   return { label: '', quantity: 1, unit_price: '', vat_rate: 20 };
 }
 
-export default function CreateInvoicePage({ clients, onCreated, onCancel }) {
+export default function CreateInvoicePage({ clients, businessProfile, onCreated, onCancel }) {
   const [clientId, setClientId] = useState('');
   const [client, setClient] = useState('');
   const [lineItems, setLineItems] = useState([emptyLine()]);
@@ -54,6 +54,11 @@ export default function CreateInvoicePage({ clients, onCreated, onCancel }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (!businessProfile) {
+      setMessage('Completez vos informations entreprise avant de creer un devis.');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
 
