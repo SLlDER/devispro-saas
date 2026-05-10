@@ -3,58 +3,23 @@ import { createInvoice } from '../api.js';
 
 const serviceTemplates = [
   { label: 'Deplacement sur site', quantity: 1, unit_price: 45, vat_rate: 20 },
-  { label: 'Diagnostic / recherche de panne', quantity: 1, unit_price: 80, vat_rate: 20 },
   { label: 'Main-d oeuvre standard', quantity: 1, unit_price: 55, vat_rate: 20 },
-  { label: 'Main-d oeuvre urgence soir / week-end', quantity: 1, unit_price: 95, vat_rate: 20 },
-  { label: 'Depannage plomberie', quantity: 1, unit_price: 120, vat_rate: 10 },
-  { label: 'Remplacement robinetterie', quantity: 1, unit_price: 180, vat_rate: 10 },
-  { label: 'Reparation fuite', quantity: 1, unit_price: 160, vat_rate: 10 },
-  { label: 'Debouchage canalisation', quantity: 1, unit_price: 140, vat_rate: 10 },
-  { label: 'Installation chauffe-eau', quantity: 1, unit_price: 650, vat_rate: 10 },
-  { label: 'Depannage electricite', quantity: 1, unit_price: 130, vat_rate: 10 },
-  { label: 'Remplacement prise ou interrupteur', quantity: 1, unit_price: 75, vat_rate: 10 },
-  { label: 'Pose luminaire', quantity: 1, unit_price: 90, vat_rate: 10 },
-  { label: 'Mise aux normes tableau electrique', quantity: 1, unit_price: 850, vat_rate: 10 },
-  { label: 'Pose materiel fourni par client', quantity: 1, unit_price: 120, vat_rate: 20 },
   { label: 'Fourniture et pose materiel', quantity: 1, unit_price: 250, vat_rate: 20 },
-  { label: 'Peinture murale au m2', quantity: 10, unit_price: 28, vat_rate: 10 },
-  { label: 'Preparation support / enduit au m2', quantity: 10, unit_price: 18, vat_rate: 10 },
-  { label: 'Pose parquet au m2', quantity: 10, unit_price: 45, vat_rate: 10 },
-  { label: 'Pose carrelage au m2', quantity: 10, unit_price: 55, vat_rate: 10 },
-  { label: 'Montage meuble / agencement', quantity: 1, unit_price: 180, vat_rate: 20 },
-  { label: 'Nettoyage fin de chantier', quantity: 1, unit_price: 150, vat_rate: 20 },
-  { label: 'Evacuation gravats', quantity: 1, unit_price: 120, vat_rate: 20 },
-  { label: 'Forfait demi-journee', quantity: 1, unit_price: 220, vat_rate: 20 },
+  { label: 'Depannage / intervention', quantity: 1, unit_price: 120, vat_rate: 10 },
+  { label: 'Prestation au m2', quantity: 10, unit_price: 35, vat_rate: 10 },
   { label: 'Forfait journee', quantity: 1, unit_price: 420, vat_rate: 20 }
 ];
 
-const customTemplatesKey = 'devispro_custom_service_templates';
-
 function emptyLine() {
   return { label: '', quantity: 1, unit_price: '', vat_rate: 20 };
-}
-
-function loadCustomTemplates() {
-  try {
-    const stored = localStorage.getItem(customTemplatesKey);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    return [];
-  }
-}
-
-function saveCustomTemplates(templates) {
-  localStorage.setItem(customTemplatesKey, JSON.stringify(templates));
 }
 
 export default function CreateInvoicePage({ clients, businessProfile, onCreated, onCancel }) {
   const [clientId, setClientId] = useState('');
   const [client, setClient] = useState('');
   const [lineItems, setLineItems] = useState([emptyLine()]);
-  const [customTemplates, setCustomTemplates] = useState(loadCustomTemplates);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const allTemplates = [...serviceTemplates, ...customTemplates];
 
   function handleClientChange(value) {
     setClientId(value);
@@ -78,39 +43,10 @@ export default function CreateInvoicePage({ clients, businessProfile, onCreated,
 
   function applyTemplate(index, templateIndex) {
     if (templateIndex === '') return;
-    const template = allTemplates[Number(templateIndex)];
+    const template = serviceTemplates[Number(templateIndex)];
     setLineItems((current) =>
       current.map((item, itemIndex) => (itemIndex === index ? { ...template } : item))
     );
-  }
-
-  function saveLineAsTemplate(index) {
-    const item = lineItems[index];
-
-    if (!item.label || !item.unit_price) {
-      setMessage('Renseignez au moins le nom et le prix HT avant de sauvegarder le modele.');
-      return;
-    }
-
-    const nextTemplates = [
-      ...customTemplates,
-      {
-        label: item.label.trim(),
-        quantity: Number(item.quantity) || 1,
-        unit_price: Number(item.unit_price) || 0,
-        vat_rate: Number(item.vat_rate) || 0
-      }
-    ].sort((a, b) => a.label.localeCompare(b.label));
-
-    setCustomTemplates(nextTemplates);
-    saveCustomTemplates(nextTemplates);
-    setMessage('Modele personnalise enregistre.');
-  }
-
-  function deleteCustomTemplate(label) {
-    const nextTemplates = customTemplates.filter((template) => template.label !== label);
-    setCustomTemplates(nextTemplates);
-    saveCustomTemplates(nextTemplates);
   }
 
   const subtotal = lineItems.reduce((sum, item) => {
@@ -179,9 +115,12 @@ export default function CreateInvoicePage({ clients, businessProfile, onCreated,
           <input value={client} onChange={(event) => setClient(event.target.value)} required />
         </label>
 
-        <div className="line-items">
+        <div className="line-items clean-lines">
           <div className="line-items-header">
-            <h3>Prestations</h3>
+            <div>
+              <h3>Prestations</h3>
+              <p>Choisissez un raccourci ou saisissez librement votre prestation.</p>
+            </div>
             <button type="button" className="secondary" onClick={() => addLine()}>
               Ajouter une ligne
             </button>
@@ -189,11 +128,11 @@ export default function CreateInvoicePage({ clients, businessProfile, onCreated,
 
           {lineItems.map((item, index) => (
             <div className="line-item" key={index}>
-              <label>
-                Modele
+              <label className="line-template">
+                Raccourci
                 <select onChange={(event) => applyTemplate(index, event.target.value)} defaultValue="">
-                  <option value="">Choisir</option>
-                  {allTemplates.map((template, templateIndex) => (
+                  <option value="">Aucun</option>
+                  {serviceTemplates.map((template, templateIndex) => (
                     <option key={template.label} value={templateIndex}>
                       {template.label}
                     </option>
@@ -201,8 +140,9 @@ export default function CreateInvoicePage({ clients, businessProfile, onCreated,
                 </select>
               </label>
               <label className="line-description">
-                Prestation
+                Nom de la prestation personnalisee
                 <input
+                  placeholder="Ex: Remplacement serrure 3 points"
                   value={item.label}
                   onChange={(event) => updateLine(index, 'label', event.target.value)}
                   required
@@ -244,25 +184,8 @@ export default function CreateInvoicePage({ clients, businessProfile, onCreated,
               <button type="button" className="ghost compact" onClick={() => removeLine(index)}>
                 Retirer
               </button>
-              <button type="button" className="secondary compact" onClick={() => saveLineAsTemplate(index)}>
-                Sauver modele
-              </button>
             </div>
           ))}
-
-          {customTemplates.length > 0 && (
-            <div className="custom-templates">
-              <h3>Modeles personnalises</h3>
-              {customTemplates.map((template) => (
-                <div key={template.label} className="custom-template-row">
-                  <span>{template.label}</span>
-                  <button type="button" className="danger compact" onClick={() => deleteCustomTemplate(template.label)}>
-                    Supprimer
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
 
           <p className="form-total">Total HT: {subtotal.toFixed(2)} EUR</p>
         </div>
