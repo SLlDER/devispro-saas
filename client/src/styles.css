@@ -69,6 +69,47 @@ p {
   padding: 1.5rem;
 }
 
+.auth-page {
+  grid-template-columns: minmax(280px, 560px) minmax(320px, 430px);
+  gap: 2rem;
+}
+
+.auth-intro {
+  max-width: 560px;
+}
+
+.auth-intro h1 {
+  font-size: 2.6rem;
+  line-height: 1.08;
+  margin-bottom: 1rem;
+}
+
+.auth-intro p {
+  color: #475569;
+  font-size: 1.05rem;
+}
+
+.eyebrow {
+  color: #0f766e;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+
+.pricing-strip {
+  display: grid;
+  gap: 0.2rem;
+  border-left: 4px solid #0f766e;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.pricing-strip span {
+  color: #64748b;
+}
+
 .auth-panel,
 .content {
   width: min(100%, 960px);
@@ -347,6 +388,23 @@ p {
   font-weight: 800;
 }
 
+.custom-templates {
+  border: 1px solid #e1e7f0;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #ffffff;
+}
+
+.custom-template-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid #e1e7f0;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -409,6 +467,14 @@ p {
 }
 
 @media (max-width: 720px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-intro h1 {
+    font-size: 2rem;
+  }
+
   .topbar,
   .section-heading,
   .invoice-card {

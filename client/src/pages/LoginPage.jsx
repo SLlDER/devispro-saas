@@ -37,6 +37,18 @@ export default function LoginPage() {
 
   return (
     <main className="auth-page">
+      <section className="auth-intro">
+        <p className="eyebrow">Devis & clients pour artisans</p>
+        <h1>Des devis propres, prêts à envoyer, sans Word ni Excel.</h1>
+        <p>
+          Gérez vos clients, créez des prestations réutilisables, générez un PDF professionnel et passez en Pro quand vous dépassez les 3 devis gratuits.
+        </p>
+        <div className="pricing-strip">
+          <strong>3 devis gratuits</strong>
+          <span>Puis abonnement Pro pour continuer en illimité.</span>
+        </div>
+      </section>
+
       <section className="auth-panel">
         <h1>DevisPro</h1>
         <p>Connectez-vous pour gerer vos devis.</p>

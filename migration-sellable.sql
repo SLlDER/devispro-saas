@@ -51,3 +51,36 @@ begin
     with check (auth.uid() = user_id);
   end if;
 end $$;
+
+create table if not exists public.document_sequences (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  document_type text not null,
+  year integer not null,
+  next_number integer not null default 1,
+  primary key (user_id, document_type, year)
+);
+
+create or replace function public.reserve_document_number(
+  p_user_id uuid,
+  p_document_type text
+)
+returns text
+language plpgsql
+security definer
+as $$
+declare
+  v_year integer := extract(year from now())::integer;
+  v_number integer;
+  v_prefix text;
+begin
+  insert into public.document_sequences (user_id, document_type, year, next_number)
+  values (p_user_id, p_document_type, v_year, 2)
+  on conflict (user_id, document_type, year)
+  do update set next_number = public.document_sequences.next_number + 1
+  returning next_number - 1 into v_number;
+
+  v_prefix := case when p_document_type = 'invoice' then 'FAC' else 'DEV' end;
+
+  return v_prefix || '-' || v_year || '-' || lpad(v_number::text, 4, '0');
+end;
+$$;

@@ -45,20 +45,16 @@ function calculateTotal(lineItems) {
 }
 
 async function nextDocumentNumber(supabase, userId, documentType) {
-  const year = new Date().getFullYear();
-  const prefix = documentType === 'invoice' ? `FAC-${year}-` : `DEV-${year}-`;
-
-  const { count, error } = await supabase
-    .from('invoices')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('document_type', documentType);
+  const { data, error } = await supabase.rpc('reserve_document_number', {
+    p_user_id: userId,
+    p_document_type: documentType
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return `${prefix}${String((count || 0) + 1).padStart(4, '0')}`;
+  return data;
 }
 
 async function getInvoiceUsage(supabase, userId) {
@@ -224,6 +220,23 @@ export async function updateInvoice(req, res) {
 export async function deleteInvoice(req, res) {
   const supabase = requireSupabase();
   const { id } = req.params;
+
+  const { data: invoice, error: fetchError } = await supabase
+    .from('invoices')
+    .select('document_type, status')
+    .eq('id', id)
+    .eq('user_id', req.user.id)
+    .single();
+
+  if (fetchError) {
+    return res.status(500).json({ error: fetchError.message });
+  }
+
+  if (invoice.document_type === 'invoice') {
+    return res.status(400).json({
+      error: 'Une facture ne doit pas etre supprimee. Marquez-la comme refusee ou creez un avoir.'
+    });
+  }
 
   const { error } = await supabase
     .from('invoices')
