@@ -23,8 +23,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 30%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), transparent 34%),
+    linear-gradient(180deg, #f7fafc 0%, #e8edf5 100%);
 }
 
 button,
@@ -115,7 +115,7 @@ h3 {
 }
 
 .auth-intro h1 {
-  font-size: 3.05rem;
+  font-size: 3.2rem;
   line-height: 1.04;
   margin-bottom: 1rem;
 }
@@ -154,9 +154,9 @@ h3 {
   width: min(100%, 980px);
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(219, 227, 238, 0.95);
-  border-radius: 12px;
-  padding: 1.6rem;
-  box-shadow: var(--shadow);
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
 }
 
 .auth-panel {
@@ -262,11 +262,20 @@ h3 {
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
-  padding: 1.1rem 1.25rem;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(219, 227, 238, 0.95);
-  border-radius: 14px;
-  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.07);
+  padding: 1.25rem 1.4rem;
+  background: linear-gradient(135deg, #122033 0%, #0f766e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.22);
+}
+
+.topbar h1,
+.topbar p {
+  color: #ffffff;
+}
+
+.topbar p {
+  opacity: 0.82;
 }
 
 .topbar-actions,
@@ -282,12 +291,13 @@ h3 {
 .app-tabs {
   display: flex;
   gap: 0.35rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   padding: 0.35rem;
   width: fit-content;
-  background: rgba(226, 232, 240, 0.72);
+  background: rgba(255, 255, 255, 0.84);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
 }
 
 .section-heading {
@@ -319,9 +329,19 @@ h3 {
 
 .stat-card {
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 1.15rem;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--primary);
 }
 
 .stat-card span {
@@ -332,7 +352,7 @@ h3 {
 }
 
 .stat-card strong {
-  font-size: 1.35rem;
+  font-size: 1.55rem;
 }
 
 .filters {
@@ -341,9 +361,10 @@ h3 {
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 0.9rem;
-  background: var(--panel-soft);
+  background: #ffffff;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
 .list-toolbar {
@@ -372,10 +393,16 @@ h3 {
   justify-content: space-between;
   gap: 1.2rem;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 1.1rem;
   background: #ffffff;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+}
+
+.invoice-card:hover,
+.client-card:hover {
+  border-color: rgba(15, 118, 110, 0.28);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
 }
 
 .client-card {
@@ -469,7 +496,7 @@ h3 {
   gap: 0.75rem;
   align-items: end;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1rem;
   background: #ffffff;
   box-shadow: 0 8px 22px rgba(24, 33, 47, 0.05);
@@ -477,7 +504,7 @@ h3 {
 
 .clean-lines {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1rem;
   background: var(--panel-soft);
 }
